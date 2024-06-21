@@ -12,70 +12,60 @@
 // [  HEADER  ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-#include "Animator.hpp"
-#include "Entities.hpp"
-#include "Region.hpp"
-#include <Content/Service.hpp>
+#include <Core/Types.hpp>
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // [   CODE   ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-namespace World
+namespace Aeldur::Server
 {
     // -=(Undocumented)=-
-    class Universe final
+    class User final
     {
     public:
 
         // -=(Undocumented)=-
-        Universe();
-
-        // -=(Undocumented)=-
-        void Initialize(Ref<Subsystem::Context> Context);
-
-        // -=(Undocumented)=-
-        void Tick(Real64 Time);
-
-        // -=(Undocumented)=-
-        SPtr<Region> Load(UInt32 RegionX, UInt32 RegionY);
-
-        // -=(Undocumented)=-
-        void Unload(UInt32 RegionX, UInt32 RegionY);
-
-        // -=(Undocumented)=-
-        Ref<Animator> GetAnimator()
+        User(UInt ID, CStr Username, CStr Password, CStr Email)
+            : mID       { ID },
+              mUsername { Username },
+              mPassword { Password },
+              mEmail    { Email }
         {
-            return mAnimator;
         }
 
         // -=(Undocumented)=-
-        Ref<Entities> GetEntities()
+        UInt GetID() const
         {
-            return mEntities;
+            return mID;
+        }
+
+        // -=(Undocumented)=-
+        CStr GetUsername() const
+        {
+            return mUsername;
+        }
+
+        // -=(Undocumented)=-
+        CStr GetPassword() const
+        {
+            return mPassword;
+        }
+
+        // -=(Undocumented)=-
+        CStr GetEmail() const
+        {
+            return mEmail;
         }
 
     private:
 
-        // -=(Undocumented)=-
-        using Registry = Table<UInt, SPtr<Region>>;
-
-        // -=(Undocumented)=-
-        void OnUpdate(Real64 Delta);
-
-    private:
-
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-        SPtr<Content::Service> mResources;
-
-        // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-        // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
-        Real64                 mTime;
-        Animator               mAnimator;
-        Entities               mEntities;
-        Registry               mRegistry;
+        const UInt mID;
+        const SStr mUsername;
+        const SStr mPassword;
+        const SStr mEmail;
     };
 }

@@ -12,14 +12,14 @@
 // [  HEADER  ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-#include "Engine/Kernel.hpp"
 #include "Options.hpp"
+#include <Engine/Kernel.hpp>
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // [   CODE   ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-namespace Client
+namespace Aeldur::Client
 {
     // -=(Undocumented)=-
     class Application final : public Engine::Kernel, public Network::Protocol
@@ -27,12 +27,15 @@ namespace Client
     public:
 
         // -=(Undocumented)=-
-        void SavePreferences();
+        void LoadOptions();
 
         // -=(Undocumented)=-
-        Ref<Options> GetPreferences()
+        void SaveOptions();
+
+        // -=(Undocumented)=-
+        Ref<Options> GetOptions()
         {
-            return mPreferences;
+            return mOptions;
         }
 
         // -=(Undocumented)=-
@@ -45,7 +48,7 @@ namespace Client
         template<typename Type = Activity>
         SPtr<Type> GetForeground()
         {
-            return mStack.empty() ? nullptr : CastPtr<Type>(mStack.front());
+            return mActivities.empty() ? nullptr : CastPtr<Type>(mActivities.back());
         }
 
         // -=(Undocumented)=-
@@ -89,8 +92,8 @@ namespace Client
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-        Options                mPreferences;
-        Vector<SPtr<Activity>> mStack;
+        Options                mOptions;
+        Vector<SPtr<Activity>> mActivities;
         SPtr<Network::Client>  mConnection;
     };
 }

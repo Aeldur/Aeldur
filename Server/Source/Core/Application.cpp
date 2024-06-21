@@ -11,16 +11,15 @@
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 #include "Application.hpp"
-#include "Account/AccountService.hpp"
 #include "Database/Database.hpp"
-#include "Network/Endpoint.hpp"
+#include "Protocol/Endpoint.hpp"
 #include <Content/Locator/SystemLocator.hpp>
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // [   CODE   ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-namespace Server
+namespace Aeldur::Server
 {
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -49,9 +48,6 @@ namespace Server
                       mOptions.GetDatabasePort());
             return false;
         }
-
-        // Initialize account service
-        AddSubsystem<AccountService>();
 
         // Initialize endpoint
         ConstSPtr<Endpoint> Endpoint = AddSubsystem<Server::Endpoint>();
@@ -100,7 +96,7 @@ int main([[maybe_unused]] int Argc, [[maybe_unused]] Ptr<Char> Argv[])
 #endif // EA_PLATFORM_WINDOWS
 
     // Initialize 'Aurora Engine' and enter main loop
-    UPtr<Server::Application> Server = NewUniquePtr<Server::Application>();
+    UPtr<Aeldur::Server::Application> Server = NewUniquePtr<Aeldur::Server::Application>();
     Server->Initialize(System<Subsystem>::Mode::Server, Engine::Properties());
     Server->Run();
 

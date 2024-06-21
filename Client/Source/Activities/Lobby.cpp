@@ -16,7 +16,7 @@
 // [   CODE   ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-namespace Client
+namespace Aeldur::Client
 {
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -34,17 +34,17 @@ namespace Client
     {
         ConstSPtr<UI::Service> Browser = GetApplication().GetSubsystem<UI::Service>();
 
-        Browser->Register("onCharacterEnter", [this](CPtr<const UI::Value> Parameters)
+        Browser->Register("onLobbyEnter", [this](CPtr<const UI::Value> Parameters)
         {
             OnCharacterEnter(Parameters[0]);
             return UI::Value();
         });
-        Browser->Register("onCharacterDelete", [this](CPtr<const UI::Value> Parameters)
+        Browser->Register("onLobbyDelete", [this](CPtr<const UI::Value> Parameters)
         {
             OnCharacterDelete(Parameters[0]);
             return UI::Value();
         });
-        Browser->Register("onLobbyLogout", [this](CPtr<const UI::Value> Parameters)
+        Browser->Register("onLobbyExit", [this](CPtr<const UI::Value> Parameters)
         {
             GetApplication().Disconnect();
             return UI::Value();
@@ -57,9 +57,9 @@ namespace Client
     void Lobby::OnDetach()
     {
         ConstSPtr<UI::Service> Browser = GetApplication().GetSubsystem<UI::Service>();
-        Browser->Unregister("onCharacterEnter");
-        Browser->Unregister("onCharacterDelete");
-        Browser->Unregister("onLobbyLogout");
+        Browser->Unregister("onLobbyEnter");
+        Browser->Unregister("onLobbyDelete");
+        Browser->Unregister("onLobbyExit");
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-

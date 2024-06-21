@@ -12,62 +12,69 @@
 // [  HEADER  ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-#include <Network/Client.hpp>
-#include <Network/Packets.hpp>
+#include "UserRepository.hpp"
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // [   CODE   ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-namespace Server
+namespace Aeldur::Server
 {
     // -=(Undocumented)=-
-    class Peer final
+    class UserService final
     {
     public:
 
         // -=(Undocumented)=-
-        Peer(ConstSPtr<Network::Client> Connection);
+        enum class Error
+        {
+            None,
+            Invalid,
+            Mismatch,
+            Exist,
+            Online,
+        };
+
+    public:
 
         // -=(Undocumented)=-
-        UInt GetID() const
-        {
-            return mConnection->GetID();
-        }
+        UserService(Ref<Subsystem::Context> Context);
 
         // -=(Undocumented)=-
-        template<typename Message>
-        void Close(Message && Packet)
-        {
-            mConnection->Write(Packet, false);
-            mConnection->Close(false);
-        }
+        Error Login(CStr Username, CStr Password);
 
         // -=(Undocumented)=-
-        void Close()
-        {
-            mConnection->Close(true);
-        }
+        Error Logout(UInt ID);
 
         // -=(Undocumented)=-
-        template<typename Message>
-        void Write(Message && Packet, Bool Unreliable = false)
-        {
-            if constexpr (std::is_base_of_v<Writer, Message>)
-            {
-                mConnection->Write(Packet.GetData(), Unreliable);
-            }
-            else
-            {
-                mConnection->Write(Packet, Unreliable);
-            }
-        }
+        Error Create(CStr Username, CStr Password, CStr Email);
+
+        // -=(Undocumented)=-
+        Error Delete(CStr Username, CStr Password);
+
+        // -=(Undocumented)=-
+        SPtr<User> GetByID(UInt ID);
+
+        // -=(Undocumented)=-
+        SPtr<User> GetByUsername(CStr Username);
+
+    private:
+
+        // -=(Undocumented)=-
+        Bool CheckUsername(CStr Username);
+
+        // -=(Undocumented)=-
+        Bool CheckEmail(CStr Email);
+
+        // -=(Undocumented)=-
+        Bool CheckPassword(CStr Password);
 
     private:
 
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-        SPtr<Network::Client> mConnection;
+        UserRepository          mRepository;
+        Table<UInt, SPtr<User>> mRegistry;
     };
 }

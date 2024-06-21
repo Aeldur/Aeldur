@@ -13,13 +13,14 @@
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 #include "Peer.hpp"
+#include "User/UserService.hpp"
 #include <Network/Service.hpp>
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // [   CODE   ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-namespace Server
+namespace Aeldur::Server
 {
     // -=(Undocumented)=-
     class Endpoint final : public Subsystem, public Network::Protocol
@@ -121,5 +122,6 @@ namespace Server
 
         SPtr<Network::Server>   mServer;
         Table<UInt, SPtr<Peer>> mRegistry;
+        UserService             mUsers;
     };
 }

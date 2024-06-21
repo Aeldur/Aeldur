@@ -17,14 +17,22 @@
 // [   CODE   ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-namespace Client
+namespace Aeldur::Client
 {
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    void Application::SavePreferences()
+    void Application::LoadOptions()
     {
-        GetSubsystem<Content::Service>()->Save("Root://Preferences.toml", mPreferences.Save());
+        mOptions.Load(GetSubsystem<Content::Service>()->Find("Root://Preferences.toml").GetText());
+    }
+
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+    void Application::SaveOptions()
+    {
+        GetSubsystem<Content::Service>()->Save("Root://Preferences.toml", mOptions.Save());
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -38,7 +46,7 @@ namespace Client
             Current->OnPause();
         }
 
-        mStack.emplace_back(Foreground);
+        mActivities.emplace_back(Foreground);
         Foreground->OnAttach();
         Foreground->OnResume();
     }
@@ -48,7 +56,7 @@ namespace Client
 
     void Application::Back()
     {
-        if (mStack.size() <= 1)
+        if (mActivities.size() <= 1)
         {
             return;
         }
@@ -58,7 +66,7 @@ namespace Client
         {
             Current->OnPause();
             Current->OnDetach();
-            mStack.pop_back();
+            mActivities.pop_back();
         }
 
         ConstSPtr<Activity> Newest = GetForeground();
@@ -83,7 +91,7 @@ namespace Client
     {
         if (mConnection)
         {
-            mConnection->Close(false);
+            mConnection->Close(true);
         }
     }
 
@@ -97,8 +105,8 @@ namespace Client
         Resources->AddLocator("Root", NewPtr<Content::SystemLocator>("."));
         Resources->AddLocator("Resources", NewPtr<Content::SystemLocator>("Resources"));
 
-        // Initialize preferences
-        mPreferences.Load(Resources->Find("Root://Preferences.toml").GetText());
+        // Initialize options
+        LoadOptions();
 
         // Initialize browser
         ConstSPtr<UI::Service> Browser = GetSubsystem<UI::Service>();
@@ -115,7 +123,7 @@ namespace Client
 
     void Application::OnDestroy()
     {
-        SavePreferences();
+        SaveOptions();
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -189,7 +197,7 @@ int main([[maybe_unused]] int Argc, [[maybe_unused]] Ptr<Char> Argv[])
     Properties.SetWindowMode(false, false);
 
     // Initialize 'Aurora Engine' and enter main loop
-    UPtr<Client::Application> Client = NewUniquePtr<Client::Application>();
+    UPtr<Aeldur::Client::Application> Client = NewUniquePtr<Aeldur::Client::Application>();
     Client->Initialize(System<Subsystem>::Mode::Client, Properties);
     Client->Run();
 

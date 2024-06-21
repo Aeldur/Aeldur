@@ -10,18 +10,18 @@
 // [  HEADER  ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-#include "AccountRepository.hpp"
+#include "UserRepository.hpp"
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // [   CODE   ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-namespace Server
+namespace Aeldur::Server
 {
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    AccountRepository::AccountRepository(ConstSPtr<Database> Database)
+    UserRepository::UserRepository(ConstSPtr<Database> Database)
         : mDatabase { Database }
     {
     }
@@ -29,38 +29,38 @@ namespace Server
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    Bool AccountRepository::Create(ConstSPtr<Account> Account)
+    Bool UserRepository::Create(Ref<const User> User)
     {
-        static constexpr CStr kStatement = "INSERT INTO public.\"Account\" (Name, Password, Email) VALUES ($1, $2, $3)";
+        static constexpr CStr kStatement = "INSERT INTO public.\"User\" (Name, Password, Email) VALUES ($1, $2, $3)";
         return (mDatabase->Query(
-            kStatement, Account->GetUsername(), Account->GetPassword(), Account->GetEmail()).affected_rows() > 0);
+            kStatement, User.GetUsername(), User.GetPassword(), User.GetEmail()).affected_rows() > 0);
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    Bool AccountRepository::Delete(ConstSPtr<Account> Account)
+    Bool UserRepository::Delete(Ref<const User> User)
     {
-        static constexpr CStr kStatement = "DELETE FROM public.\"Account\" WHERE id=$1";
-        return (mDatabase->Query(kStatement, Account->GetID()).affected_rows() > 0);
+        static constexpr CStr kStatement = "DELETE FROM public.\"User\" WHERE id=$1";
+        return (mDatabase->Query(kStatement, User.GetID()).affected_rows() > 0);
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    Bool AccountRepository::Update(ConstSPtr<Account> Account)
+    Bool UserRepository::Update(Ref<const User> User)
     {
-        static constexpr CStr kStatement = "UPDATE public.\"Account\" SET name=$2, password=$3, email=$4 WHERE id=$1";
+        static constexpr CStr kStatement = "UPDATE public.\"User\" SET name=$2, password=$3, email=$4 WHERE id=$1";
         return (mDatabase->Query(
-            kStatement, Account->GetID(), Account->GetUsername(), Account->GetPassword(), Account->GetEmail()).affected_rows() > 0);
+            kStatement, User.GetID(), User.GetUsername(), User.GetPassword(), User.GetEmail()).affected_rows() > 0);
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    SPtr<Account> AccountRepository::GetByID(UInt ID)
+    SPtr<User> UserRepository::GetByID(UInt ID)
     {
-        static constexpr CStr kStatement = "SELECT * FROM public.\"Account\" WHERE id=$1";
+        static constexpr CStr kStatement = "SELECT * FROM public.\"User\" WHERE id=$1";
 
         const pqxx::result Result = mDatabase->Query(kStatement, ID);
         return (Result.empty() ? nullptr : Load(Result.front()));
@@ -69,7 +69,7 @@ namespace Server
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    SPtr<Account> AccountRepository::GetByUsername(CStr Username)
+    SPtr<User> UserRepository::GetByUsername(CStr Username)
     {
         static constexpr CStr kStatement = "SELECT * FROM public.\"Account\" WHERE name=$1";
 
@@ -80,9 +80,9 @@ namespace Server
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    SPtr<Account> AccountRepository::Load(Ref<const pqxx::row> Entry)
+    SPtr<User> UserRepository::Load(Ref<const pqxx::row> Entry)
     {
-        return NewPtr<Account>(
+        return NewPtr<User>(
             Entry["id"].as<UInt>(),
             Entry["name"].as<CStr>(),
             Entry["password"].as<CStr>(),

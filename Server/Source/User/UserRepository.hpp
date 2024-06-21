@@ -12,60 +12,48 @@
 // [  HEADER  ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-#include <Core/Types.hpp>
+#include "User.hpp"
+#include "Database/Database.hpp"
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // [   CODE   ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-namespace Server
+namespace Aeldur::Server
 {
     // -=(Undocumented)=-
-    class Account final
+    class UserRepository final
     {
     public:
 
         // -=(Undocumented)=-
-        Account(UInt ID, CStr Username, CStr Password, CStr Email)
-            : mID       { ID },
-              mUsername { Username },
-              mPassword { Password },
-              mEmail    { Email }
-        {
-        }
+        UserRepository(ConstSPtr<Database> Database);
 
         // -=(Undocumented)=-
-        UInt GetID() const
-        {
-            return mID;
-        }
+        Bool Create(Ref<const User> User);
 
         // -=(Undocumented)=-
-        CStr GetUsername() const
-        {
-            return mUsername;
-        }
+        Bool Delete(Ref<const User> User);
 
         // -=(Undocumented)=-
-        CStr GetPassword() const
-        {
-            return mPassword;
-        }
+        Bool Update(Ref<const User> User);
 
         // -=(Undocumented)=-
-        CStr GetEmail() const
-        {
-            return mEmail;
-        }
+        SPtr<User> GetByID(UInt ID);
+
+        // -=(Undocumented)=-
+        SPtr<User> GetByUsername(CStr Username);
+
+    private:
+
+        // -=(Undocumented)=-
+        SPtr<User> Load(Ref<const pqxx::row> Entry);
 
     private:
 
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-        const UInt mID;
-        const SStr mUsername;
-        const SStr mPassword;
-        const SStr mEmail;
+        SPtr<Database> mDatabase;
     };
 }

@@ -10,19 +10,19 @@
 // [  HEADER  ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-#include "Universe.hpp"
+#include "World.hpp"
 #include "RegionLoader.hpp"
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // [   CODE   ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-namespace World
+namespace Aeldur
 {
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    Universe::Universe()
+    World::World()
         : mEntities { mAnimator }
     {
     }
@@ -30,9 +30,9 @@ namespace World
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    void Universe::Initialize(Ref<Subsystem::Context> Context)
+    void World::Initialize(Ref<Subsystem::Context> Context)
     {
-        // Initialize our custom loader(s)
+        // Initialize our custom loader(s) for \see Region
         mResources = Context.GetSubsystem<Content::Service>();
         mResources->AddLoader(NewPtr<RegionLoader>(mAnimator, mEntities));
 
@@ -43,7 +43,7 @@ namespace World
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    void Universe::Tick(Real64 Time)
+    void World::Tick(Real64 Time)
     {
         const Real64 Delta = Time - mTime;
         mTime = Time;
@@ -56,7 +56,7 @@ namespace World
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    SPtr<Region> Universe::Load(UInt32 RegionX, UInt32 RegionY)
+    SPtr<Region> World::Load(UInt32 RegionX, UInt32 RegionY)
     {
         const UInt32 RegionID = Region::GetID(RegionX, RegionY);
 
@@ -68,7 +68,7 @@ namespace World
         {
             const Content::Uri Uri(Format("Resources://World/{}-{}.region", RegionX, RegionY));
 
-            if (const SPtr<Region> Region = mResources->Load<World::Region>(Uri); Region->HasLoaded())
+            if (const SPtr<Region> Region = mResources->Load<Aeldur::Region>(Uri); Region->HasLoaded())
             {
                 mRegistry.try_emplace(RegionID, Region);
                 return Region;
@@ -80,7 +80,7 @@ namespace World
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    void Universe::Unload(UInt32 RegionX, UInt32 RegionY)
+    void World::Unload(UInt32 RegionX, UInt32 RegionY)
     {
         constexpr Vector2i kDimension = Vector2i(Region::kTilesPerRow, Region::kTilesPerColumn) * Tile::kDimension;
 
@@ -96,8 +96,8 @@ namespace World
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    void Universe::OnUpdate(Real64 Delta)
+    void World::OnUpdate(Real64 Delta)
     {
-        // TODO: Create a list of Tickable Entities in the Entities manager class and iterate it.
+        // TODO: Create a list of Tick-able Entities in the Entities manager class and iterate it.
     }
 }

@@ -17,7 +17,7 @@
 // [   CODE   ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-namespace World
+namespace Aeldur
 {
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -32,9 +32,9 @@ namespace World
 
     Bool Animator::LoadAnimations(Ref<Subsystem::Context> Context)
     {
-        ConstSPtr<Content::Service> Service = Context.GetSubsystem<Content::Service>();
+        ConstSPtr<Content::Service> Resources = Context.GetSubsystem<Content::Service>();
 
-        if (const Chunk File = Service->Find(Content::Uri(kAnimationFilename)); File.HasData())
+        if (const Chunk File = Resources->Find(Content::Uri(kAnimationFilename)); File.HasData())
         {
             Reader Input(File.GetSpan<UInt08>());
 

@@ -17,7 +17,7 @@
 // [   CODE   ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-namespace Client
+namespace Aeldur::Client
 {
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -35,17 +35,17 @@ namespace Client
     {
         ConstSPtr<UI::Service> Browser = GetApplication().GetSubsystem<UI::Service>();
 
-        Browser->Register("onAccountLogin", [this](CPtr<const UI::Value> Parameters)
+        Browser->Register("onGatewayLogin", [this](CPtr<const UI::Value> Parameters)
         {
             OnAccountLogin(Parameters[0], Parameters[1]);
             return UI::Value();
         });
-        Browser->Register("onAccountCreate", [this](CPtr<const UI::Value> Parameters)
+        Browser->Register("onGatewayCreate", [this](CPtr<const UI::Value> Parameters)
         {
             OnAccountCreate(Parameters[0], Parameters[1], Parameters[2]);
             return UI::Value();
         });
-        Browser->Register("onAccountExit", [this](CPtr<const UI::Value>) -> UI::Value {
+        Browser->Register("onGatewayExit", [this](CPtr<const UI::Value>) -> UI::Value {
             GetApplication().Exit();
             return UI::Value();
         });
@@ -57,9 +57,9 @@ namespace Client
     void Gateway::OnDetach()
     {
         ConstSPtr<UI::Service> Browser = GetApplication().GetSubsystem<UI::Service>();
-        Browser->Unregister("onAccountLogin");
-        Browser->Unregister("onAccountCreate");
-        Browser->Unregister("onAccountExit");
+        Browser->Unregister("onGatewayLogin");
+        Browser->Unregister("onGatewayCreate");
+        Browser->Unregister("onGatewayExit");
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -77,6 +77,10 @@ namespace Client
     {
         ConstSPtr<UI::Service> Browser = GetApplication().GetSubsystem<UI::Service>();
         Browser->Call("setMainScreen", "templates/connect.html");
+
+        // Use the username that we stored when we logged the first time.
+        const SStr Username(GetApplication().GetOptions().GetUsername());
+        Browser->Call("setAccountUsername", Username);
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -205,6 +209,9 @@ namespace Client
 
     void Gateway::OnAccountAuthorized(Ref<const GatewayAccountData> Message)
     {
+        // Store the username for next time
+        GetApplication().GetOptions().SetUsername(mUsername);
+
         // Switch to the next activity (Lobby)
         GetApplication().Goto(NewPtr<Lobby>(GetApplication()));
 

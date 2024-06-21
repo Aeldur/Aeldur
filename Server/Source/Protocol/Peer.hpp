@@ -12,69 +12,76 @@
 // [  HEADER  ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-#include "AccountRepository.hpp"
+#include "User/User.hpp"
+#include <Network/Client.hpp>
+#include <Protocol/Protocol.hpp>
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // [   CODE   ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-namespace Server
+namespace Aeldur::Server
 {
     // -=(Undocumented)=-
-    class AccountService final : public Subsystem
+    class Peer final
     {
     public:
 
         // -=(Undocumented)=-
-        enum class Error
+        Peer(ConstSPtr<Network::Client> Connection);
+
+        // -=(Undocumented)=-
+        UInt GetID() const
         {
-            None,
-            Invalid,
-            Mismatch,
-            Exist,
-            Online,
-        };
-
-    public:
+            return mConnection->GetID();
+        }
 
         // -=(Undocumented)=-
-        AccountService(Ref<Context> Context);
+        void SetUser(ConstSPtr<User> User)
+        {
+            mUser = User;
+        }
 
         // -=(Undocumented)=-
-        Error Login(CStr Username, CStr Password);
+        ConstSPtr<User> GetUser() const
+        {
+            return mUser;
+        }
 
         // -=(Undocumented)=-
-        Error Logout(UInt ID);
+        template<typename Message>
+        void Close(Message && Packet)
+        {
+            mConnection->Write(Packet, false);
+            mConnection->Close(false);
+        }
 
         // -=(Undocumented)=-
-        Error Create(CStr Username, CStr Password, CStr Email);
+        void Close()
+        {
+            mConnection->Close(true);
+        }
 
         // -=(Undocumented)=-
-        Error Delete(CStr Username, CStr Password);
-
-        // -=(Undocumented)=-
-        SPtr<Account> GetByID(UInt ID);
-
-        // -=(Undocumented)=-
-        SPtr<Account> GetByUsername(CStr Username);
-
-    private:
-
-        // -=(Undocumented)=-
-        Bool CheckUsername(CStr Username);
-
-        // -=(Undocumented)=-
-        Bool CheckEmail(CStr Email);
-
-        // -=(Undocumented)=-
-        Bool CheckPassword(CStr Password);
+        template<typename Message>
+        void Write(Message && Packet, Bool Unreliable = false)
+        {
+            if constexpr (std::is_base_of_v<Writer, Message>)
+            {
+                mConnection->Write(Packet.GetData(), Unreliable);
+            }
+            else
+            {
+                mConnection->Write(Packet, Unreliable);
+            }
+        }
 
     private:
 
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-        AccountRepository          mRepository;
-        Table<UInt, SPtr<Account>> mRegistry;
+        SPtr<Network::Client> mConnection;
+        SPtr<User>            mUser;
     };
 }

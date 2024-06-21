@@ -11,34 +11,33 @@
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 #include "Endpoint.hpp"
-#include "Account/AccountService.hpp"
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // [   CODE   ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-namespace Server
+namespace Aeldur::Server
 {
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    static void NotifyAccountError(ConstSPtr<Peer> Session, AccountService::Error Error)
+    static void NotifyAccountError(ConstSPtr<Peer> Session, UserService::Error Error)
     {
         switch (Error)
         {
-        case AccountService::Error::None:
+        case UserService::Error::None:
             Session->Write(GatewayAccountResult(GatewayAccountResult::ID::OK));
             break;
-        case AccountService::Error::Invalid:
+        case UserService::Error::Invalid:
             Session->Close(GatewayAccountResult(GatewayAccountResult::ID::Unknown));
             break;
-        case AccountService::Error::Mismatch:
+        case UserService::Error::Mismatch:
             Session->Close(GatewayAccountResult(GatewayAccountResult::ID::Mismatch));
             break;
-        case AccountService::Error::Exist:
+        case UserService::Error::Exist:
             Session->Close(GatewayAccountResult(GatewayAccountResult::ID::Exist));
             break;
-        case AccountService::Error::Online:
+        case UserService::Error::Online:
             Session->Close(GatewayAccountResult(GatewayAccountResult::ID::Online));
             break;
         }
@@ -48,7 +47,8 @@ namespace Server
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
     Endpoint::Endpoint(Ref<Context> Context)
-        : Subsystem(Context)
+        : Subsystem(Context),
+          mUsers { Context }
     {
     }
 
@@ -97,6 +97,12 @@ namespace Server
         const SPtr<Peer> Session = mRegistry.at(Connection->GetID());
         mRegistry.erase(Connection->GetID());
 
+        // Logout if the session was logged-in
+        if (ConstSPtr<User> User = Session->GetUser())
+        {
+            mUsers.Logout(User->GetID());
+        }
+
         // TODO
     }
 
@@ -140,12 +146,11 @@ namespace Server
 
     void Endpoint::OnHandle(ConstSPtr<Peer> Session, Ref<const GatewayAccountLogin> Message)
     {
-        const AccountService::Error Result
-            = GetSubsystem<AccountService>()->Login(Message.Username, Message.Password);
+        const UserService::Error Result = mUsers.Login(Message.Username, Message.Password);
 
-        if (Result == AccountService::Error::None)
+        if (Result == UserService::Error::None)
         {
-            //Session->SetAccount(mAccounts.GetByUsername(Message.Username));
+            Session->SetUser(mUsers.GetByUsername(Message.Username));
             Session->Write(GatewayAccountData()); // TODO: Send character
         }
         else
@@ -159,12 +164,11 @@ namespace Server
 
     void Endpoint::OnHandle(ConstSPtr<Peer> Session, Ref<const GatewayAccountRegister> Message)
     {
-        const AccountService::Error Result
-            = GetSubsystem<AccountService>()->Create(Message.Username, Message.Password, Message.Email);
+        const UserService::Error Result = mUsers.Create(Message.Username, Message.Password, Message.Email);
 
-        if (Result == AccountService::Error::None)
+        if (Result == UserService::Error::None)
         {
-            //Session->SetAccount(mAccounts.GetByUsername(Message.Username));
+            Session->SetUser(mUsers.GetByUsername(Message.Username));
             Session->Write(GatewayAccountData()); // TODO: Send character
         }
         else
@@ -178,10 +182,9 @@ namespace Server
 
     void Endpoint::OnHandle(ConstSPtr<Peer> Session, Ref<const GatewayAccountDelete> Message)
     {
-        const AccountService::Error Result
-            = GetSubsystem<AccountService>()->Delete(Message.Username, Message.Password);
+        const UserService::Error Result = mUsers.Delete(Message.Username, Message.Password);
 
-        if (Result == AccountService::Error::None)
+        if (Result == UserService::Error::None)
         {
             // TODO ....
         }

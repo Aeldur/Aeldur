@@ -10,52 +10,51 @@
 // [  HEADER  ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-#include "AccountService.hpp"
+#include "UserService.hpp"
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // [   CODE   ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-namespace Server
+namespace Aeldur::Server
 {
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    AccountService::AccountService(Ref<Context> Context)
-        : Subsystem(Context),
-          mRepository { Context.GetSubsystem<Database>() }
+    UserService::UserService(Ref<Subsystem::Context> Context)
+        : mRepository { Context.GetSubsystem<Database>() }
     {
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    AccountService::Error AccountService::Login(CStr Username, CStr Password)
+    UserService::Error UserService::Login(CStr Username, CStr Password)
     {
         if (!CheckUsername(Username) || !CheckPassword(Password))
         {
             return Error::Invalid;
         }
 
-        const SPtr<Account> Account = mRepository.GetByUsername(Username);
-        if (!Account || Account->GetPassword() != Password)
+        const SPtr<User> User = mRepository.GetByUsername(Username);
+        if (!User || User->GetPassword() != Password)
         {
             return Error::Mismatch;
         }
 
-        if (mRegistry.contains(Account->GetID()))
+        if (mRegistry.contains(User->GetID()))
         {
             return Error::Online;
         }
 
-        mRegistry.try_emplace(Account->GetID(), Account);
+        mRegistry.try_emplace(User->GetID(), User);
         return Error::None;
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    AccountService::Error AccountService::Logout(UInt ID)
+    UserService::Error UserService::Logout(UInt ID)
     {
         return mRegistry.erase(ID) > 0 ? Error::None : Error::Invalid;
     }
@@ -63,50 +62,49 @@ namespace Server
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    AccountService::Error AccountService::Create(CStr Username, CStr Password, CStr Email)
+    UserService::Error UserService::Create(CStr Username, CStr Password, CStr Email)
     {
         if (!CheckUsername(Username) || !CheckPassword(Password) || !CheckEmail(Email))
         {
             return Error::Invalid;
         }
 
-        const SPtr<Account> Account = NewPtr<Server::Account>(0, Username, Password, Email);
-
-        return mRepository.Create(Account) ? Error::None : Error::Exist;
+        User User(0, Username, Password, Email);
+        return mRepository.Create(User) ? Error::None : Error::Exist;
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    AccountService::Error AccountService::Delete(CStr Username, CStr Password)
+    UserService::Error UserService::Delete(CStr Username, CStr Password)
     {
         if (!CheckUsername(Username) || !CheckPassword(Password))
         {
             return Error::Invalid;
         }
 
-        const SPtr<Account> Account = mRepository.GetByUsername(Username);
-        if (!Account || Account->GetPassword() != Password)
+        const SPtr<User> User = mRepository.GetByUsername(Username);
+        if (!User || User->GetPassword() != Password)
         {
             return Error::Mismatch;
         }
 
-        return mRepository.Delete(Account) ? Error::None : Error::Invalid;
+        return mRepository.Delete(* User) ? Error::None : Error::Invalid;
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    SPtr<Account> AccountService::GetByID(UInt ID)
+    SPtr<User> UserService::GetByID(UInt ID)
     {
-        const auto InMemoryIterator = mRegistry.find(ID);
-        return (InMemoryIterator != mRegistry.end() ? InMemoryIterator->second : mRepository.GetByID(ID));
+        const auto Iterator = mRegistry.find(ID);
+        return (Iterator != mRegistry.end() ? Iterator->second : mRepository.GetByID(ID));
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    SPtr<Account> AccountService::GetByUsername(CStr Username)
+    SPtr<User> UserService::GetByUsername(CStr Username)
     {
         return mRepository.GetByUsername(Username);
     }
@@ -114,7 +112,7 @@ namespace Server
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    Bool AccountService::CheckUsername(CStr Username)
+    Bool UserService::CheckUsername(CStr Username)
     {
         static constexpr UInt kMinLength = 4;
         static constexpr UInt kMaxLength = 20;
@@ -124,7 +122,7 @@ namespace Server
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    Bool AccountService::CheckEmail(CStr Email)
+    Bool UserService::CheckEmail(CStr Email)
     {
         static constexpr UInt kMinLength = 8;
         static constexpr UInt kMaxLength = 50;
@@ -134,7 +132,7 @@ namespace Server
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    Bool AccountService::CheckPassword(CStr Password)
+    Bool UserService::CheckPassword(CStr Password)
     {
         static constexpr UInt kMinLength = 6;
         static constexpr UInt kMaxLength = 18;

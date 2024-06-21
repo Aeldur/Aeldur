@@ -12,48 +12,70 @@
 // [  HEADER  ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-#include "Account.hpp"
-#include "Database/Database.hpp"
+#include "Animator.hpp"
+#include "Entities.hpp"
+#include "Region.hpp"
+#include <Content/Service.hpp>
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // [   CODE   ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-namespace Server
+namespace Aeldur
 {
     // -=(Undocumented)=-
-    class AccountRepository final
+    class World final
     {
     public:
 
         // -=(Undocumented)=-
-        AccountRepository(ConstSPtr<Database> Database);
+        World();
 
         // -=(Undocumented)=-
-        Bool Create(ConstSPtr<Account> Account);
+        void Initialize(Ref<Subsystem::Context> Context);
 
         // -=(Undocumented)=-
-        Bool Delete(ConstSPtr<Account> Account);
+        void Tick(Real64 Time);
 
         // -=(Undocumented)=-
-        Bool Update(ConstSPtr<Account> Account);
+        SPtr<Region> Load(UInt32 RegionX, UInt32 RegionY);
 
         // -=(Undocumented)=-
-        SPtr<Account> GetByID(UInt ID);
+        void Unload(UInt32 RegionX, UInt32 RegionY);
 
         // -=(Undocumented)=-
-        SPtr<Account> GetByUsername(CStr Username);
+        Ref<Animator> GetAnimator()
+        {
+            return mAnimator;
+        }
+
+        // -=(Undocumented)=-
+        Ref<Entities> GetEntities()
+        {
+            return mEntities;
+        }
 
     private:
 
         // -=(Undocumented)=-
-        SPtr<Account> Load(Ref<const pqxx::row> Entry);
+        using Registry = Table<UInt32, SPtr<Region>>;
+
+        // -=(Undocumented)=-
+        void OnUpdate(Real64 Delta);
 
     private:
 
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-        SPtr<Database> mDatabase;
+        SPtr<Content::Service> mResources;
+
+        // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+        // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+        Real64                 mTime;
+        Registry               mRegistry;
+        Animator               mAnimator;
+        Entities               mEntities;
     };
 }
