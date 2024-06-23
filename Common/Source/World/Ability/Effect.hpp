@@ -21,23 +21,22 @@
 namespace Aeldur
 {
     // -=(Undocumented)=-
-    template<typename Attribute, typename Marker>
+    template<typename Attributes, typename Markers>
     class Effect final
     {
     public:
 
         // -=(Undocumented)=-
-        using Modifier = StatModifier<Attribute>;
+        using Modifier = StatModifier<Attributes>;
 
     public:
 
         // -=(Undocumented)=-
-        Effect(UInt32 ID, CStr Name, CStr Description, Real32 Duration, UInt32 Stack)
-            : mID          { ID },
-              mName        { Name },
-              mDescription { Description },
-              mDuration    { Duration },
-              mStack       { Stack }
+        Effect(UInt32 ID, CStr Name, Real32 Duration, UInt32 Stack)
+            : mID       { ID },
+              mName     { Name },
+              mDuration { Duration },
+              mStack    { Stack }
         {
         }
 
@@ -54,12 +53,6 @@ namespace Aeldur
         }
 
         // -=(Undocumented)=-
-        CStr GetDescription() const
-        {
-            return mDescription;
-        }
-
-        // -=(Undocumented)=-
         Real32 GetDuration() const
         {
             return mDuration;
@@ -71,7 +64,29 @@ namespace Aeldur
             return mStack;
         }
 
-        // @TODO: Modifiers and Tags
+        // -=(Undocumented)=-
+        void AddModifier(Ref<const Modifier> Modifier)
+        {
+            mModifiers.emplace_back(Modifier);
+        }
+
+        // -=(Undocumented)=-
+        CPtr<const Modifier> GetModifiers() const
+        {
+            return mModifiers;
+        }
+
+        // -=(Undocumented)=-
+        void AddMarker(Markers Marker)
+        {
+            mMarkers.emplace_back(Marker);
+        }
+
+        // -=(Undocumented)=-
+        CPtr<const Markers> GetMarkers() const
+        {
+            return mMarkers;
+        }
 
     private:
 
@@ -80,10 +95,9 @@ namespace Aeldur
 
         const UInt32     mID;
         const SStr       mName;
-        const SStr       mDescription;
         const Real32     mDuration;
         const UInt32     mStack;
         Vector<Modifier> mModifiers;
-        Vector<Marker>   mTags;
+        Vector<Markers>  mMarkers;
     };
 }

@@ -21,7 +21,7 @@
 namespace Aeldur
 {
     // -=(Undocumented)=-
-    template<typename Attribute>
+    template<typename Attributes>
     class StatModifier final
     {
     public:
@@ -45,7 +45,7 @@ namespace Aeldur
     public:
 
         // -=(Undocumented)=-
-        constexpr StatModifier(Attribute Target, Action Action, Real32 Magnitude)
+        constexpr StatModifier(Attributes Target, Action Action, Real32 Magnitude)
             : mTarget    { Target },
               mAction    { Action },
               mMagnitude { Magnitude }
@@ -53,7 +53,7 @@ namespace Aeldur
         }
 
         // -=(Undocumented)=-
-        Attribute GetTarget() const
+        Attributes GetTarget() const
         {
             return mTarget;
         }
@@ -71,41 +71,45 @@ namespace Aeldur
         }
 
         // -=(Undocumented)=-
-        void Apply(Ref<StatFlyweight> Stat)
+        void Apply(Ref<StatFlyweight> Stat, Real32 Intensity) const
         {
+            const Real32 Value = (mMagnitude * Intensity);
+
             switch (mAction)
             {
             case Action::Add:
-                Stat.SetAdditive(Stat.GetAdditive() + mMagnitude);
+                Stat.SetAdditive(Stat.GetAdditive() + Value);
                 break;
             case Action::Sub:
-                Stat.SetAdditive(Stat.GetAdditive() - mMagnitude);
+                Stat.SetAdditive(Stat.GetAdditive() - Value);
                 break;
             case Action::Inc:
-                Stat.SetMultiplier(Stat.GetMultiplier() + mMagnitude);
+                Stat.SetMultiplier(Stat.GetMultiplier() + Value);
                 break;
             case Action::Dec:
-                Stat.SetMultiplier(Stat.GetMultiplier() - mMagnitude);
+                Stat.SetMultiplier(Stat.GetMultiplier() - Value);
                 break;
             }
         }
 
         // -=(Undocumented)=-
-        void Reset(Ref<StatFlyweight> Stat)
+        void Erase(Ref<StatFlyweight> Stat, Real32 Intensity) const
         {
+            const Real32 Value = (mMagnitude * Intensity);
+
             switch (mAction)
             {
             case Action::Add:
-                Stat.SetAdditive(Stat.GetAdditive() - mMagnitude);
+                Stat.SetAdditive(Stat.GetAdditive() - Value);
                 break;
             case Action::Sub:
-                Stat.SetAdditive(Stat.GetAdditive() + mMagnitude);
+                Stat.SetAdditive(Stat.GetAdditive() + Value);
                 break;
             case Action::Inc:
-                Stat.SetMultiplier(Stat.GetMultiplier() - mMagnitude);
+                Stat.SetMultiplier(Stat.GetMultiplier() - Value);
                 break;
             case Action::Dec:
-                Stat.SetMultiplier(Stat.GetMultiplier() + mMagnitude);
+                Stat.SetMultiplier(Stat.GetMultiplier() + Value);
                 break;
             }
         }
@@ -115,8 +119,8 @@ namespace Aeldur
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-        const Attribute mTarget;
-        const Action    mAction;
-        const Real32    mMagnitude;
+        const Attributes mTarget;
+        const Action     mAction;
+        const Real32     mMagnitude;
     };
 }

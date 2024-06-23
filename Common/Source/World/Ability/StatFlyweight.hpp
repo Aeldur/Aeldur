@@ -26,11 +26,18 @@ namespace Aeldur
     public:
 
         // -=(Undocumented)=-
-        StatFlyweight()
+        constexpr StatFlyweight()
             : mBase       { 0 },
               mAdditive   { 0 },
-              mMultiplier { 0 }
+              mMultiplier { 0 },
+              mEffective  { 0 }
         {
+        }
+
+        // -=(Undocumented)=-
+        void Calculate()
+        {
+            mEffective = (mBase + mAdditive) + ((mBase + mAdditive) * mMultiplier);
         }
 
         // -=(Undocumented)=-
@@ -72,7 +79,7 @@ namespace Aeldur
         // -=(Undocumented)=-
         Real32 GetEffective() const
         {
-            return (mBase + mAdditive) + ((mBase + mAdditive) * mMultiplier); // @TODO: once every change
+            return mEffective;
         }
 
     private:
@@ -83,5 +90,6 @@ namespace Aeldur
         Real32 mBase;
         Real32 mAdditive;
         Real32 mMultiplier;
+        Real32 mEffective;
     };
 }
