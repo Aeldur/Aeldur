@@ -21,11 +21,35 @@
 namespace Aeldur
 {
     // -=(Undocumented)=-
-    class Ability final
+    class StatArchetype final
     {
     public:
 
-        // @TODO: What is an ability?
+        // -=(Undocumented)=-
+        constexpr StatArchetype(Real32 Minimum = -FLT_MAX, Real32 Maximum = FLT_MAX)
+            : mMinimum { Minimum },
+              mMaximum { Maximum }
+        {
+        }
 
+        // -=(Undocumented)=-
+        Real32 GetMinimum() const
+        {
+            return mMinimum;
+        }
+
+        // -=(Undocumented)=-
+        Real32 GetMaximum() const
+        {
+            return mMaximum;
+        }
+
+    private:
+
+        // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+        // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+        const Real32 mMinimum;
+        const Real32 mMaximum;
     };
 }

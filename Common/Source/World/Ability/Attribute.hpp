@@ -21,91 +21,46 @@
 namespace Aeldur
 {
     // -=(Undocumented)=-
-    class Stat final
+    class Attribute final
     {
     public:
 
         // -=(Undocumented)=-
-        enum class Action
-        {
-            // -=(Undocumented)=-
-            Set,
-
-            // -=(Undocumented)=-
-            Add,
-
-            // -=(Undocumented)=-
-            Sub,
-
-            // -=(Undocumented)=-
-            Inc,
-
-            // -=(Undocumented)=-
-            Dec,
-        };
-
-    public:
-
-        // -=(Undocumented)=-
-        constexpr Stat()
-            : mBase       { 0 },
-              mAdditive   { 0 },
-              mMultiplier { 0 },
-              mEffective  { 0 }
+        constexpr Attribute(UInt32 ID)
+            : mID { ID }
         {
         }
 
         // -=(Undocumented)=-
-        void Apply(Action Operation, Real32 Magnitude)
+        template<typename T, typename = typename std::enable_if<std::is_enum<T>::value, T>::type>
+        constexpr Attribute(T ID)
+            : Attribute(CastEnum(ID))
         {
-            switch (Operation)
-            {
-            case Action::Set:
-                mBase = Magnitude;
-                break;
-            case Action::Add:
-                mAdditive += Magnitude;
-                break;
-            case Action::Sub:
-                mAdditive -= Magnitude;
-                break;
-            case Action::Inc:
-                mMultiplier += Magnitude;
-                break;
-            case Action::Dec:
-                mMultiplier -= Magnitude;
-                break;
-            }
         }
 
         // -=(Undocumented)=-
-        void Calculate()
+        constexpr UInt32 GetID() const
         {
-            mEffective = (mBase + mAdditive) + ((mBase + mAdditive) * mMultiplier);
+            return mID;
         }
 
         // -=(Undocumented)=-
-        Real32 GetBase() const
+        Bool operator<(Ref<const Attribute> Other) const
         {
-            return mBase;
+            return mID < Other.mID;
         }
 
         // -=(Undocumented)=-
-        Real32 GetAdditive() const
+        Bool operator>(Ref<const Attribute> Other) const
         {
-            return mAdditive;
+            return mID > Other.mID;
         }
 
         // -=(Undocumented)=-
-        Real32 GetMultiplier() const
+        template<typename T, typename = typename std::enable_if<std::is_enum<T>::value, T>::type>
+        constexpr operator T() const
         {
-            return mMultiplier;
-        }
-
-        // -=(Undocumented)=-
-        Real32 GetEffective() const
-        {
-            return mEffective;
+            return static_cast<T>(mID);
         }
 
     private:
@@ -113,9 +68,6 @@ namespace Aeldur
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-        Real32 mBase;
-        Real32 mAdditive;
-        Real32 mMultiplier;
-        Real32 mEffective;
+        const UInt32 mID;
     };
 }

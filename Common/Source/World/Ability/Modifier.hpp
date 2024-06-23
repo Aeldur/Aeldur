@@ -12,7 +12,8 @@
 // [  HEADER  ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-#include <Core/Core.hpp>
+#include "Attribute.hpp"
+#include "Stat.hpp"
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // [   CODE   ]
@@ -21,65 +22,51 @@
 namespace Aeldur
 {
     // -=(Undocumented)=-
-    class StatFlyweight final
+    class Modifier final
     {
     public:
 
         // -=(Undocumented)=-
-        constexpr StatFlyweight()
-            : mBase       { 0 },
-              mAdditive   { 0 },
-              mMultiplier { 0 },
-              mEffective  { 0 }
+        using Action = Stat::Action;
+
+    public:
+
+        // -=(Undocumented)=-
+        constexpr Modifier(Attribute Attribute, Action Operation, Real32 Magnitude)
+            : mAttribute { Attribute },
+              mOperation { Operation },
+              mMagnitude { Magnitude }
         {
         }
 
         // -=(Undocumented)=-
-        void Calculate()
+        Attribute GetAttribute() const
         {
-            mEffective = (mBase + mAdditive) + ((mBase + mAdditive) * mMultiplier);
+            return mAttribute;
         }
 
         // -=(Undocumented)=-
-        void SetBase(Real32 Value)
+        Action GetOperation() const
         {
-            mBase = Value;
+            return mOperation;
         }
 
         // -=(Undocumented)=-
-        Real32 GetBase() const
+        Real32 GetMagnitude() const
         {
-            return mBase;
+            return mMagnitude;
         }
 
         // -=(Undocumented)=-
-        void SetAdditive(Real32 Value)
+        void OnApply(Ref<Stat> Stat, Real32 Intensity) const
         {
-            mAdditive = Value;
+            Stat.Apply(mOperation, mMagnitude * Intensity);
         }
 
         // -=(Undocumented)=-
-        Real32 GetAdditive() const
+        void OnErase(Ref<Stat> Stat, Real32 Intensity) const
         {
-            return mAdditive;
-        }
-
-        // -=(Undocumented)=-
-        void SetMultiplier(Real32 Value)
-        {
-            mMultiplier = Value;
-        }
-
-        // -=(Undocumented)=-
-        Real32 GetMultiplier() const
-        {
-            return mMultiplier;
-        }
-
-        // -=(Undocumented)=-
-        Real32 GetEffective() const
-        {
-            return mEffective;
+            Stat.Apply(mOperation, -mMagnitude * Intensity);
         }
 
     private:
@@ -87,9 +74,8 @@ namespace Aeldur
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-        Real32 mBase;
-        Real32 mAdditive;
-        Real32 mMultiplier;
-        Real32 mEffective;
+        const Attribute mAttribute;
+        const Action    mOperation;
+        const Real32    mMagnitude;
     };
 }

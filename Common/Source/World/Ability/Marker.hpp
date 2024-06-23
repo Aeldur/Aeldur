@@ -12,7 +12,7 @@
 // [  HEADER  ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-#include "StatModifier.hpp"
+#include <Core/Core.hpp>
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // [   CODE   ]
@@ -21,71 +21,46 @@
 namespace Aeldur
 {
     // -=(Undocumented)=-
-    template<typename Attributes, typename Markers>
-    class Effect final
+    class Marker final
     {
     public:
 
         // -=(Undocumented)=-
-        using Modifier = StatModifier<Attributes>;
-
-    public:
-
-        // -=(Undocumented)=-
-        Effect(UInt32 ID, CStr Name, Real32 Duration, UInt32 Stack)
-            : mID       { ID },
-              mName     { Name },
-              mDuration { Duration },
-              mStack    { Stack }
+        constexpr Marker(UInt32 ID)
+            : mID { ID }
         {
         }
 
         // -=(Undocumented)=-
-        UInt32 GetID() const
+        template<typename T, typename = typename std::enable_if<std::is_enum<T>::value, T>::type>
+        constexpr Marker(T ID)
+            : Marker(CastEnum(ID))
+        {
+        }
+
+        // -=(Undocumented)=-
+        constexpr UInt32 GetID() const
         {
             return mID;
         }
 
         // -=(Undocumented)=-
-        CStr GetName() const
+        Bool operator<(Ref<const Marker> Other) const
         {
-            return mName;
+            return mID < Other.mID;
         }
 
         // -=(Undocumented)=-
-        Real32 GetDuration() const
+        Bool operator>(Ref<const Marker> Other) const
         {
-            return mDuration;
+            return mID > Other.mID;
         }
 
         // -=(Undocumented)=-
-        UInt32 GetStack() const
+        template<typename T, typename = typename std::enable_if<std::is_enum<T>::value, T>::type>
+        constexpr operator T() const
         {
-            return mStack;
-        }
-
-        // -=(Undocumented)=-
-        void AddModifier(Ref<const Modifier> Modifier)
-        {
-            mModifiers.emplace_back(Modifier);
-        }
-
-        // -=(Undocumented)=-
-        CPtr<const Modifier> GetModifiers() const
-        {
-            return mModifiers;
-        }
-
-        // -=(Undocumented)=-
-        void AddMarker(Markers Marker)
-        {
-            mMarkers.emplace_back(Marker);
-        }
-
-        // -=(Undocumented)=-
-        CPtr<const Markers> GetMarkers() const
-        {
-            return mMarkers;
+            return static_cast<T>(mID);
         }
 
     private:
@@ -93,11 +68,6 @@ namespace Aeldur
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-        const UInt32     mID;
-        const SStr       mName;
-        const Real32     mDuration;
-        const UInt32     mStack;
-        Vector<Modifier> mModifiers;
-        Vector<Markers>  mMarkers;
+        const UInt32 mID;
     };
 }
